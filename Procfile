@@ -1,0 +1,1 @@
+web: streamlit run cattle_with_breed_classifier.py --server.port=$PORT --server.address=0.0.0.0
