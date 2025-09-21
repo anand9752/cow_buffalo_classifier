@@ -4,7 +4,8 @@
 # prints a warning asking for you to install it. The watchdog module is not required,
 # it's just an optimization. If you know you don't want to install watchdog, you can
 # suppress this warning by setting this to True.
-disableWatchdogWarning = false
+# NOTE: This option is deprecated in newer versions
+# disableWatchdogWarning = false
 
 # By default, Streamlit displays a warning when a user sets both a widget default
 # value in the function defining the widget and a widget value via the widget's key
@@ -18,8 +19,8 @@ level = "info"
 
 [client]
 
-# Whether to enable st.cache.
-caching = true
+# Whether to enable st.cache - DEPRECATED in newer versions
+# caching = true
 
 # If false, makes your Streamlit script not run as the result of most kinds of
 # "reruns" (such as after a widget interaction), but rather allows you to control
@@ -34,11 +35,12 @@ magicEnabled = true
 
 # Install a Python tracer to allow you to stop or pause your script at any point
 # and introspect it. As a side-effect, this slows down your script's execution.
-installTracer = false
+# NOTE: This option is deprecated in newer versions
+# installTracer = false
 
 # Sets the MPLBACKEND environment variable to Agg inside Streamlit to prevent
-# Python crashing.
-fixMatplotlib = true
+# Python crashing - DEPRECATED in newer versions
+# fixMatplotlib = true
 
 # Run the Python Garbage Collector after each script execution. This can help to
 # reduce memory usage in Streamlit apps, but could also cause app slowdowns.
@@ -73,7 +75,7 @@ fileWatcherType = "auto"
 cookieSecret = "cattle-breed-classifier-secret-key-2025"
 
 # If false, will attempt to open a browser window on start.
-headless = false
+headless = true
 
 # Automatically rerun script when the file is modified on disk.
 runOnSave = false
@@ -124,7 +126,7 @@ enableStaticServing = false
 serverAddress = "localhost"
 
 # Whether to send usage statistics to Streamlit.
-gatherUsageStats = true
+gatherUsageStats = false
 
 # Port where users should point their browsers in order to connect to the app.
 # This is used to: - Set the correct URL for CORS and XSRF protection purposes.
@@ -133,22 +135,14 @@ gatherUsageStats = true
 # Default: whatever value is set in server.port.
 serverPort = 8501
 
-[mapbox]
+# NOTE: mapbox.token is deprecated - use MAPBOX_API_KEY environment variable instead
+# [mapbox]
+# token = ""
 
-# Configure Streamlit to use a custom Mapbox
-# token for elements like st.pydeck_chart and st.map.
-# To get a token for yourself, create an account at
-# https://mapbox.com. It's free (for moderate usage levels)!
-# Default: ""
-token = ""
-
-[deprecation]
-
-# Set to false to disable the deprecation warning for the file uploader encoding.
-showfileUploaderEncoding = true
-
-# Set to false to disable the deprecation warning for using the global pyplot instance.
-showPyplotGlobalUse = true
+# NOTE: These deprecation options are no longer valid in newer Streamlit versions
+# [deprecation]
+# showfileUploaderEncoding = true
+# showPyplotGlobalUse = true
 
 [theme]
 
