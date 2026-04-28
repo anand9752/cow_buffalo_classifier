@@ -9,12 +9,26 @@ import pandas as pd
 import numpy as np
 import os
 from datetime import datetime
+from translations import translations
+
+# -----------------------------
+# Translation Helper
+# -----------------------------
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'en'
+
+def t(key, *args):
+    text = translations[st.session_state.lang].get(key, key)
+    if args:
+        return text.format(*args)
+    return text
+
 
 # -----------------------------
 # Page configuration
 # -----------------------------
 st.set_page_config(
-    page_title="🐄 AI-Powered Cattle & Breed Classifier",
+    page_title=t("title"),
     layout="wide",
     page_icon="🐂",
     initial_sidebar_state="expanded"
@@ -25,202 +39,211 @@ st.set_page_config(
 # -----------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap');
 
 /* Global styling */
 .stApp {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    font-family: 'Poppins', sans-serif;
+    background-color: #F8F9FA;
+    font-family: 'Inter', sans-serif;
+    color: #31352E;
 }
 
 /* Sidebar styling */
-.css-1d391kg {
-    background: linear-gradient(180deg, #2C3E50 0%, #34495E 100%);
+[data-testid="stSidebar"] {
+    background-color: #E8F5E9;
+    border-right: 1px solid #C8E6C9;
 }
 
 /* Main content area */
 .main .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
+    max-width: 1200px;
 }
 
-/* Enhanced card styling */
+/* Enhanced card styling - Matching the image */
 .card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    margin: 1rem 0;
+    background: #FFFFFF;
+    border: 1px solid #E0E4E0;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin: 1.5rem 0;
     transition: all 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
 }
 
 /* Title and header styling */
 .main-title {
     text-align: center;
-    color: white;
-    font-size: 3rem;
+    color: #2D4627;
+    font-size: 2.8rem;
     font-weight: 700;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .subtitle {
     text-align: center;
-    color: rgba(255,255,255,0.9);
-    font-size: 1.2rem;
-    font-weight: 300;
-    margin-bottom: 2rem;
+    color: #5D7E3B;
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.5px;
 }
 
 /* Section headers */
 .section-header {
-    color: white;
-    font-size: 1.8rem;
+    color: #2D4627;
+    font-size: 1.6rem;
     font-weight: 600;
-    margin: 1.5rem 0 1rem 0;
-    border-bottom: 3px solid #3498db;
+    margin: 2rem 0 1.2rem 0;
+    border-bottom: 2px solid #5D7E3B;
     padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
 }
 
 /* Feature boxes */
 .feature-box {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
+    background: #F1F8E9;
+    color: #1B5E20;
     padding: 1.5rem;
-    border-radius: 15px;
+    border-radius: 12px;
     text-align: center;
     margin: 1rem 0;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    transition: transform 0.3s ease;
+    border: 1px solid #C8E6C9;
+    transition: all 0.3s ease;
 }
 
 .feature-box:hover {
-    transform: scale(1.05);
+    background: #E8F5E9;
+    transform: scale(1.02);
 }
 
 /* Metric styling */
 .metric-container {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: #5D7E3B;
     color: white;
-    padding: 1rem;
-    border-radius: 10px;
+    padding: 1.2rem;
+    border-radius: 12px;
     text-align: center;
     margin: 0.5rem;
+    box-shadow: 0 4px 12px rgba(93, 126, 59, 0.2);
 }
 
-/* Button styling */
+/* Button styling - Matching the green button in image */
 .stButton>button {
-    background: linear-gradient(90deg, #3498db, #2980b9);
-    color: white;
-    font-weight: 600;
-    border: none;
-    border-radius: 15px;
-    height: 3rem;
-    width: 100%;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background-color: #5D7E3B !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    height: 3.5rem !important;
+    width: 100% !important;
+    font-size: 1.1rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 10px rgba(93, 126, 59, 0.25) !important;
+    text-transform: none !important;
 }
 
 .stButton>button:hover {
-    background: linear-gradient(90deg, #2980b9, #3498db);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    background-color: #4A652F !important;
+    box-shadow: 0 6px 15px rgba(93, 126, 59, 0.35) !important;
+    transform: translateY(-1px);
 }
 
 /* Progress bar styling */
 .progress-container {
-    background: rgba(255,255,255,0.2);
-    border-radius: 25px;
-    height: 30px;
+    background: #F0F4F0;
+    border-radius: 10px;
+    height: 12px;
     margin: 1rem 0;
     overflow: hidden;
 }
 
 .progress-bar {
     height: 100%;
-    border-radius: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
+    background-color: #5D7E3B;
     transition: width 0.5s ease;
 }
 
 /* Image container */
 .image-container {
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    margin: 1rem 0;
+    border: 1px solid #E0E4E0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    margin: 1.5rem 0;
+    background: white;
 }
 
-/* Info box */
+/* Info, Warning, Success boxes */
 .info-box {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
-    color: white;
-    padding: 1rem;
+    background: #E3F2FD;
+    color: #0D47A1;
+    padding: 1.2rem;
     border-radius: 10px;
     margin: 1rem 0;
+    border-left: 5px solid #2196F3;
 }
 
-/* Warning box */
 .warning-box {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-    padding: 1rem;
+    background: #FFF3E0;
+    color: #E65100;
+    padding: 1.2rem;
     border-radius: 10px;
     margin: 1rem 0;
+    border-left: 5px solid #FF9800;
 }
 
-/* Success box */
 .success-box {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
-    color: white;
-    padding: 1rem;
+    background: #F1F8E9;
+    color: #1B5E20;
+    padding: 1.2rem;
     border-radius: 10px;
     margin: 1rem 0;
+    border-left: 5px solid #5D7E3B;
 }
 
 /* Technical specs styling */
 .tech-spec {
-    background: rgba(44, 62, 80, 0.8);
-    color: white;
+    background: white;
+    color: #31352E;
     padding: 1.5rem;
-    border-radius: 15px;
+    border-radius: 12px;
     margin: 1rem 0;
-    border-left: 5px solid #3498db;
+    border: 1px solid #E0E4E0;
+    border-left: 5px solid #5D7E3B;
 }
 
 /* Workflow step */
 .workflow-step {
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
-    border: 2px solid #3498db;
-    border-radius: 15px;
+    background: white;
+    border: 1px solid #E0E4E0;
+    border-radius: 12px;
     padding: 1.5rem;
     margin: 1rem 0;
-    color: white;
+    color: #31352E;
+    display: flex;
+    align-items: center;
 }
 
 .step-number {
-    background: #3498db;
+    background: #5D7E3B;
     color: white;
-    width: 40px;
-    height: 40px;
+    min-width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    margin-right: 1rem;
+    margin-right: 1.2rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1073,8 +1096,8 @@ def display_breed_info():
         for i, (breed_name, breed_info) in enumerate(indian_cow_breeds.items()):
             with cols[i % 2]:
                 st.markdown(f"""
-                <div class="card" style="margin: 1rem 0; padding: 1.5rem;">
-                    <h4 style="color: #3498db; margin-bottom: 1rem;">{breed_name.replace('_', ' ')}</h4>
+                <div class="card" style="margin: 1rem 0; padding: 1.5rem; border-top: 4px solid #5D7E3B;">
+                    <h4 style="color: #2D4627; margin-bottom: 1rem;">{breed_name.replace('_', ' ')}</h4>
                     <p><strong>📍 Origin:</strong> {breed_info['origin']}</p>
                     <p><strong>🥛 Milk Yield:</strong> {breed_info['milk_yield']}</p>
                     <p><strong>🎯 Purpose:</strong> {breed_info['breeding_purpose']}</p>
@@ -1092,8 +1115,8 @@ def display_breed_info():
         for i, (breed_name, breed_info) in enumerate(buffalo_breeds.items()):
             with cols[i % 2]:
                 st.markdown(f"""
-                <div class="card" style="margin: 1rem 0; padding: 1.5rem;">
-                    <h4 style="color: #e74c3c; margin-bottom: 1rem;">{breed_name.replace('_', ' ')}</h4>
+                <div class="card" style="margin: 1rem 0; padding: 1.5rem; border-top: 4px solid #388E3C;">
+                    <h4 style="color: #1B5E20; margin-bottom: 1rem;">{breed_name.replace('_', ' ')}</h4>
                     <p><strong>📍 Origin:</strong> {breed_info['origin']}</p>
                     <p><strong>🥛 Milk Yield:</strong> {breed_info['milk_yield']}</p>
                     <p><strong>🧈 Fat Content:</strong> {breed_info['fat_content']}</p>
@@ -1111,8 +1134,8 @@ def display_breed_info():
         for i, (breed_name, breed_info) in enumerate(international_breeds.items()):
             with cols[i % 2]:
                 st.markdown(f"""
-                <div class="card" style="margin: 1rem 0; padding: 1.5rem;">
-                    <h4 style="color: #f39c12; margin-bottom: 1rem;">{breed_name.replace('_', ' ')}</h4>
+                <div class="card" style="margin: 1rem 0; padding: 1.5rem; border-top: 4px solid #689F38;">
+                    <h4 style="color: #33691E; margin-bottom: 1rem;">{breed_name.replace('_', ' ')}</h4>
                     <p><strong>📍 Origin:</strong> {breed_info['origin']}</p>
                     <p><strong>🥛 Milk Yield:</strong> {breed_info['milk_yield']}</p>
                     <p><strong>🧈 Fat Content:</strong> {breed_info['fat_content']}</p>
@@ -1132,7 +1155,7 @@ def display_breed_info():
             breed_data = {
                 'Type': ['Cow Breeds', 'Buffalo Breeds'],
                 'Count': [cow_count, buffalo_count],
-                'Color': ['#3498db', '#e74c3c']
+                'Color': ['#5D7E3B', '#388E3C']
             }
             
             fig1 = px.pie(
@@ -1156,7 +1179,7 @@ def display_breed_info():
             origin_data = {
                 'Origin': ['Indian Breeds', 'International Breeds'],
                 'Count': [indian_count, international_count],
-                'Color': ['#27ae60', '#9b59b6']
+                'Color': ['#5D7E3B', '#81C784']
             }
             
             fig2 = px.pie(
@@ -1200,7 +1223,7 @@ def display_breed_info():
             color=[b['Type'] for b in top_breeds],
             title="Top 10 Milk Producing Breeds",
             labels={'x': 'Breed', 'y': 'Maximum Milk Yield (Liters/Lactation)'},
-            color_discrete_map={'Cow': '#3498db', 'Buffalo': '#e74c3c'}
+            color_discrete_map={'Cow': '#5D7E3B', 'Buffalo': '#388E3C'}
         )
         fig3.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
@@ -1226,7 +1249,7 @@ def display_breed_info():
         with col2:
             st.markdown(f"""
             <div class="metric-container">
-                <h4>Cow Breeds</h4>
+                <h4>{t("cow_breeds_stat")}</h4>
                 <h2>{cow_count}</h2>
             </div>
             """, unsafe_allow_html=True)
@@ -1234,7 +1257,7 @@ def display_breed_info():
         with col3:
             st.markdown(f"""
             <div class="metric-container">
-                <h4>Buffalo Breeds</h4>
+                <h4>{t("buffalo_breeds_stat")}</h4>
                 <h2>{buffalo_count}</h2>
             </div>
             """, unsafe_allow_html=True)
@@ -1243,7 +1266,7 @@ def display_breed_info():
             avg_yield = sum([b['Max_Yield'] for b in breed_yields]) / len(breed_yields)
             st.markdown(f"""
             <div class="metric-container">
-                <h4>Avg. Max Yield</h4>
+                <h4>{t("avg_yield_stat")}</h4>
                 <h2>{avg_yield:.0f}L</h2>
             </div>
             """, unsafe_allow_html=True)
@@ -1253,17 +1276,40 @@ def display_breed_info():
 # -----------------------------
 def main():
     # Header
-    st.markdown('<h1 class="main-title">🐄 AI-Powered Cattle & Breed Classifier</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="subtitle">Advanced Deep Learning System for Cattle Species and Breed Identification</p>', unsafe_allow_html=True)
+    st.markdown(f'<h1 class="main-title">{t("title")}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<p class="subtitle">{t("subtitle")}</p>', unsafe_allow_html=True)
     
     # Sidebar
+    st.sidebar.markdown(f"## 🌐 Language / भाषा / ਭਾਸ਼ਾ")
+    lang_options = {
+        "English": "en",
+        "हिंदी (Hindi)": "hi",
+        "मराठी (Marathi)": "mr",
+        "ਪੰਜਾਬੀ (Punjabi)": "pa"
+    }
+    selected_lang_name = st.sidebar.selectbox(
+        "Select Language",
+        options=list(lang_options.keys()),
+        index=list(lang_options.values()).index(st.session_state.lang)
+    )
+    st.session_state.lang = lang_options[selected_lang_name]
+    
+    st.sidebar.markdown("---")
     display_model_info()
     
     # Navigation
-    page = st.sidebar.selectbox(
-        "🧭 Navigation",
-        ["🏠 Home", "🔬 How It Works", "📚 Breed Information", "📋 About"]
+    nav_options = {
+        t("nav_home"): "🏠 Home",
+        t("nav_how"): "🔬 How It Works",
+        t("nav_breeds"): "📚 Breed Information",
+        t("nav_about"): "📋 About"
+    }
+    
+    page_label = st.sidebar.selectbox(
+        f"🧭 {t('nav_home').split(' ')[0]} Navigation",
+        options=list(nav_options.keys())
     )
+    page = nav_options[page_label]
     
     if page == "🏠 Home":
         display_home_page()
@@ -1281,38 +1327,38 @@ def display_home_page():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="feature-box">
-            <h3>🎯 High Accuracy</h3>
-            <p>95% accuracy in cattle classification</p>
+            <h3>{t("feat_accuracy")}</h3>
+            <p>{t("feat_accuracy_desc")}</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="feature-box">
-            <h3>🌟 41 Breeds</h3>
-            <p>Comprehensive breed database</p>
+            <h3>{t("feat_breeds")}</h3>
+            <p>{t("feat_breeds_desc")}</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="feature-box">
-            <h3>⚡ Real-time</h3>
-            <p>Instant AI-powered analysis</p>
+            <h3>{t("feat_realtime")}</h3>
+            <p>{t("feat_realtime_desc")}</p>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     # File upload section
-    st.markdown('<h2 class="section-header">📸 Upload Image for Analysis</h2>', unsafe_allow_html=True)
+    st.markdown(f'<h2 class="section-header">{t("upload_title")}</h2>', unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
-        "Choose an image file", 
+        t("upload_label"), 
         type=['jpg', 'jpeg', 'png'],
-        help="Upload a clear image of a cow or buffalo for best results"
+        help=t("upload_help")
     )
     
     if uploaded_file:
@@ -1323,23 +1369,23 @@ def display_home_page():
         
         with col1:
             st.markdown('<div class="image-container">', unsafe_allow_html=True)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
+            st.image(image, caption=t("uploaded_image"), use_column_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
             # Display image metadata
-            st.markdown("""
+            st.markdown(f"""
             <div class="card">
-                <h3>📊 Image Information</h3>
+                <h3>{t("img_info")}</h3>
             </div>
             """, unsafe_allow_html=True)
             
             file_details = {
-                "Filename": uploaded_file.name,
-                "File size": f"{uploaded_file.size / 1024:.2f} KB",
-                "Image dimensions": f"{image.size[0]} × {image.size[1]} pixels",
-                "Color mode": image.mode,
-                "Upload time": datetime.now().strftime("%H:%M:%S")
+                t("filename"): uploaded_file.name,
+                t("file_size"): f"{uploaded_file.size / 1024:.2f} KB",
+                t("img_dimensions"): f"{image.size[0]} × {image.size[1]} pixels",
+                t("color_mode"): image.mode,
+                t("upload_time"): datetime.now().strftime("%H:%M:%S")
             }
             
             for key, value in file_details.items():
@@ -1355,7 +1401,7 @@ def display_home_page():
 
 def perform_prediction(image):
     """Perform cattle and breed prediction"""
-    st.markdown('<h2 class="section-header">🤖 AI Analysis Results</h2>', unsafe_allow_html=True)
+    st.markdown(f'<h2 class="section-header">{t("analysis_results")}</h2>', unsafe_allow_html=True)
     
     # Load and run cattle classification
     with st.spinner("🔍 Analyzing image with AI models..."):
@@ -1379,8 +1425,8 @@ def perform_prediction(image):
     with col1:
         st.markdown(f"""
         <div class="card">
-            <h3>🐄 Cattle Classification</h3>
-            <h2 style="color: #3498db;">{predicted_cattle}</h2>
+            <h3>{t("cattle_classification")}</h3>
+            <h2 style="color: #5D7E3B;">{predicted_cattle}</h2>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1396,7 +1442,7 @@ def perform_prediction(image):
         """, unsafe_allow_html=True)
     
     # Detailed confidence breakdown
-    st.markdown("### 📈 Confidence Analysis")
+    st.markdown(f"### {t('confidence_analysis')}")
     confidence_data = pd.DataFrame({
         'Class': cattle_class_names,
         'Confidence': [confidence if predicted_cattle == cls else (1-confidence)/(len(cattle_class_names)-1) for cls in cattle_class_names]
@@ -1419,13 +1465,13 @@ def perform_prediction(image):
     
     # Breed detection logic
     if confidence >= 0.60 and predicted_cattle in ['Cow', 'Buffalo']:
-        st.markdown("""
+        st.markdown(f"""
         <div class="success-box">
-            ✅ <strong>High confidence detected!</strong> Proceeding with breed classification...
+            {t("high_confidence")}
         </div>
         """, unsafe_allow_html=True)
         
-        if st.button("🔬 Analyze Breed", key="breed_button"):
+        if st.button(t("analyze_breed_btn"), key="breed_button"):
             with st.spinner(f"🧬 Identifying {predicted_cattle.lower()} breed..."):
                 try:
                     breed_model_path = 'models/breed_classifier.pth'
@@ -1440,8 +1486,8 @@ def perform_prediction(image):
                     
                     # Display breed results
                     st.markdown(f"""
-                    <div class="card" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
-                        <h2>🏆 Breed Identification Complete!</h2>
+                    <div class="card" style="background: #5D7E3B; border: none;">
+                        <h2>{t("breed_identification_complete")}</h2>
                         <h1 style="color: white; text-align: center; margin: 1rem 0;">
                             {predicted_breed.replace('_', ' ')}
                         </h1>
@@ -1457,9 +1503,8 @@ def perform_prediction(image):
     else:
         st.markdown(f"""
         <div class="warning-box">
-            ⚠️ <strong>Low confidence classification ({confidence*100:.1f}%)</strong><br>
-            Breed detection requires minimum 60% confidence and valid cattle detection.
-            Please try with a clearer image of a cow or buffalo.
+            ⚠️ <strong>{t("low_confidence")} ({confidence*100:.1f}%)</strong><br>
+            {t("upload_help")}
         </div>
         """, unsafe_allow_html=True)
 
@@ -1471,9 +1516,9 @@ def display_breed_details(breed_name):
         
         # Main breed header
         st.markdown(f"""
-        <div class="card" style="background: linear-gradient(135deg, #27ae60, #2ecc71); margin-top: 2rem;">
+        <div class="card" style="background: #5D7E3B; border: none; margin-top: 2rem;">
             <h1 style="color: white; text-align: center; margin-bottom: 1rem;">
-                🏆 {breed_name.replace('_', ' ')} Details
+                {t("breed_details_title", breed_name.replace('_', ' '))}
             </h1>
             <p style="color: white; text-align: center; font-size: 1.2rem; font-style: italic;">
                 {breed_info['description']}
@@ -1487,24 +1532,24 @@ def display_breed_details(breed_name):
         with col1:
             st.markdown(f"""
             <div class="card">
-                <h3 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">
-                    📍 Basic Information
+                <h3 style="color: #2D4627; border-bottom: 2px solid #5D7E3B; padding-bottom: 0.5rem;">
+                    {t("basic_info")}
                 </h3>
                 <div style="margin-top: 1rem;">
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🏠 Origin:</strong> {breed_info['origin']}
+                        <strong>{t("origin")}:</strong> {breed_info['origin']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🐄 Type:</strong> {breed_info['type']}
+                        <strong>{t("type")}:</strong> {breed_info['type']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🎨 Color:</strong> {breed_info['color']}
+                        <strong>{t("color")}:</strong> {breed_info['color']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>📏 Size:</strong> {breed_info['size']}
+                        <strong>{t("size")}:</strong> {breed_info['size']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>⚖️ Weight:</strong> {breed_info['weight']}
+                        <strong>{t("weight")}:</strong> {breed_info['weight']}
                     </div>
                 </div>
             </div>
@@ -1513,24 +1558,24 @@ def display_breed_details(breed_name):
         with col2:
             st.markdown(f"""
             <div class="card">
-                <h3 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 0.5rem;">
-                    🥛 Production Details
+                <h3 style="color: #2D4627; border-bottom: 2px solid #5D7E3B; padding-bottom: 0.5rem;">
+                    {t("production_details")}
                 </h3>
                 <div style="margin-top: 1rem;">
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🥛 Milk Yield:</strong> {breed_info['milk_yield']}
+                        <strong>{t("milk_yield")}:</strong> {breed_info['milk_yield']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🧈 Fat Content:</strong> {breed_info['fat_content']}
+                        <strong>{t("fat_content")}:</strong> {breed_info['fat_content']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>📅 Lactation Period:</strong> {breed_info['lactation_period']}
+                        <strong>{t("lactation_period")}:</strong> {breed_info['lactation_period']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🔄 Calving Interval:</strong> {breed_info['calving_interval']}
+                        <strong>{t("calving_interval")}:</strong> {breed_info['calving_interval']}
                     </div>
                     <div class="tech-spec" style="margin: 0.5rem 0;">
-                        <strong>🎯 Purpose:</strong> {breed_info['breeding_purpose']}
+                        <strong>{t("purpose")}:</strong> {breed_info['breeding_purpose']}
                     </div>
                 </div>
             </div>
@@ -1539,20 +1584,20 @@ def display_breed_details(breed_name):
         # Characteristics and Special Features
         st.markdown(f"""
         <div class="card">
-            <h3 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 0.5rem;">
-                ✨ Characteristics & Special Features
+            <h3 style="color: #2D4627; border-bottom: 2px solid #5D7E3B; padding-bottom: 0.5rem;">
+                {t("characteristics_title")}
             </h3>
             <div style="margin-top: 1rem;">
                 <div class="tech-spec" style="margin: 1rem 0;">
-                    <strong>🧬 Key Characteristics:</strong><br>
+                    <strong>{t("characteristics")}:</strong><br>
                     <p style="margin-top: 0.5rem; line-height: 1.6;">{breed_info['characteristics']}</p>
                 </div>
                 <div class="tech-spec" style="margin: 1rem 0;">
-                    <strong>🌟 Special Features:</strong><br>
+                    <strong>{t("special_features")}:</strong><br>
                     <p style="margin-top: 0.5rem; line-height: 1.6;">{breed_info['special_features']}</p>
                 </div>
                 <div class="tech-spec" style="margin: 1rem 0;">
-                    <strong>🌡️ Climate Adaptation:</strong><br>
+                    <strong>{t("climate_adaptation")}:</strong><br>
                     <p style="margin-top: 0.5rem; line-height: 1.6;">{breed_info['climate_adaptation']}</p>
                 </div>
             </div>
@@ -1560,7 +1605,7 @@ def display_breed_details(breed_name):
         """, unsafe_allow_html=True)
         
         # Visual comparison charts
-        st.markdown("### 📊 Performance Comparison")
+        st.markdown(f"### {t('performance_comparison')}")
         
         # Create comparison data based on breed type
         if breed_info['type'] == 'Cow':
@@ -1640,9 +1685,10 @@ def display_breed_details(breed_name):
         # Recommendations section
         st.markdown(f"""
         <div class="card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
-            <h3 style="color: white; text-align: center;">💡 Farming Recommendations</h3>
+            <h3 style="color: white; text-align: center;">{t("farming_recommendations")}</h3>
             <div style="margin-top: 1rem; color: white;">
         """, unsafe_allow_html=True)
+        
         
         # Generate recommendations based on breed characteristics
         recommendations = []
@@ -1683,17 +1729,17 @@ def display_breed_details(breed_name):
         with col1:
             st.markdown(f"""
             <div class="metric-container" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
-                <h4>💰 Economic Potential</h4>
-                <p><strong>Primary Income:</strong> {breed_info['breeding_purpose']}</p>
-                <p><strong>Milk Value:</strong> {"High" if int(breed_info['milk_yield'].split('-')[0]) > 2000 else "Medium" if int(breed_info['milk_yield'].split('-')[0]) > 1000 else "Low"}</p>
-                <p><strong>Maintenance:</strong> {"Low" if 'hardy' in breed_info['characteristics'].lower() else "Medium"}</p>
+                <h4>{t("economic_potential")}</h4>
+                <p><strong>{t("primary_income")}:</strong> {breed_info['breeding_purpose']}</p>
+                <p><strong>{t("milk_value")}:</strong> {t("high") if int(breed_info['milk_yield'].split('-')[0]) > 2000 else t("medium") if int(breed_info['milk_yield'].split('-')[0]) > 1000 else t("low")}</p>
+                <p><strong>{t("maintenance")}:</strong> {t("low") if 'hardy' in breed_info['characteristics'].lower() else t("medium")}</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
             <div class="metric-container" style="background: linear-gradient(135deg, #3498db, #2980b9);">
-                <h4>🎯 Best Suited For</h4>
+                <h4>{t("best_suited_for")}</h4>
                 <p><strong>Farm Size:</strong> {breed_info['size']} scale operations</p>
                 <p><strong>Climate:</strong> {breed_info['climate_adaptation']}</p>
                 <p><strong>Farmer Type:</strong> {"Commercial" if int(breed_info['milk_yield'].split('-')[0]) > 2000 else "Small-scale"}</p>
@@ -1715,26 +1761,26 @@ def display_breed_details(breed_name):
     
     # Add a section for user feedback
     st.markdown("---")
-    st.markdown("### 💬 Was this information helpful?")
+    st.markdown(f"### {t('feedback_title')}")
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("👍 Very Helpful", key=f"helpful_{breed_name}"):
+        if st.button(t("helpful_btn"), key=f"helpful_{breed_name}"):
             st.success("Thank you for your feedback!")
     
     with col2:
-        if st.button("👌 Somewhat Helpful", key=f"okay_{breed_name}"):
+        if st.button(t("somewhat_helpful_btn"), key=f"okay_{breed_name}"):
             st.success("Thank you! We'll continue improving our breed database.")
     
     with col3:
-        if st.button("👎 Need More Info", key=f"more_{breed_name}"):
+        if st.button(t("more_info_btn"), key=f"more_{breed_name}"):
             st.info("Thank you for feedback! We're constantly updating our breed information.")
 
 def display_technical_details():
     """Display technical implementation details"""
-    st.markdown('<h2 class="section-header">⚙️ Technical Implementation</h2>', unsafe_allow_html=True)
+    st.markdown(f'<h2 class="section-header">{t("tech_impl")}</h2>', unsafe_allow_html=True)
     
-    tab1, tab2, tab3 = st.tabs(["🏗️ Architecture", "📊 Training Process", "🔧 Performance"])
+    tab1, tab2, tab3 = st.tabs([t("technical_tab"), t("process_tab"), t("performance_tab")])
     
     with tab1:
         st.markdown("""

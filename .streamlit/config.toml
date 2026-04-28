@@ -147,16 +147,16 @@ serverPort = 8501
 [theme]
 
 # Primary accent color for interactive elements.
-primaryColor = "#3498db"
+primaryColor = "#5D7E3B"
 
 # Background color for the main content area.
-backgroundColor = "#0e1117"
+backgroundColor = "#F8F9FA"
 
 # Background color used for the sidebar and most interactive widgets.
-secondaryBackgroundColor = "#262730"
+secondaryBackgroundColor = "#E8F5E9"
 
 # Color used for almost all text.
-textColor = "#fafafa"
+textColor = "#31352E"
 
 # Font family for all text in Streamlit apps.
 font = "sans serif"
